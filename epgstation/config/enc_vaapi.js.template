@@ -9,10 +9,9 @@ const isDualMono = parseInt(process.env.AUDIOCOMPONENTTYPE, 10) == 2;
 const args = ['-y'];
 
 // settings
-const audioBitrate = '128k';
-const preset = 'veryfast';
-const crf = 24;
-const videoFilter = 'yadif'
+const audioBitrate = '192k';
+const qp = 21;
+const videoFilter = 'format=nv12,hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920'
 
 /**
  * 動画長取得関数
@@ -38,12 +37,18 @@ const getDuration = filePath => {
     });
 };
 
+Array.prototype.push.apply(args, [
+    '-vaapi_device', '/dev/dri/renderD128',
+    // '-hwaccel', 'vaapi',
+    // '-hwaccel_output_format', 'vaapi'
+]);
+
 // 字幕用
 Array.prototype.push.apply(args, ['-fix_sub_duration']);
 // input 設定
 Array.prototype.push.apply(args, ['-i', input]);
 // ビデオストリーム設定
-Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'libx264']);
+Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'h264_vaapi']);
 // インターレス解除
 Array.prototype.push.apply(args, ['-vf', videoFilter]);
 // オーディオストリーム設定
@@ -60,22 +65,23 @@ if (isDualMono) {
 } else {
     Array.prototype.push.apply(args, ['-map', '0:a']);
 }
-Array.prototype.push.apply(args, ['-c:a', 'aac']);
+Array.prototype.push.apply(args, ['-c:a', 'libfdk_aac']);
 // 字幕ストリーム設定
 Array.prototype.push.apply(args, ['-map', '0:s?', '-c:s', 'mov_text']);
 
 // 品質設定
-//Array.prototype.push.apply(args, ['-preset', preset, '-crf', crf]);
+//Array.prototype.push.apply(args, ['-preset', 'veryfast', '-crf', '26']);
+
 
 // Other options ...
-Array.prototype.push.apply(args, ['-maxrate:v', '2.5M']);
-Array.prototype.push.apply(args, ['-bufsize:v', 2621440]); // 1024*1024*2.5
 Array.prototype.push.apply(args, [
-    '-aspect', '16:9',
+    '-qp', qp,
+    '-g', '300',
+    '-bf', '8',
     '-f', 'mp4',
     '-ar', '48000',
     '-ab', audioBitrate,
-    '-ac', '2'
+    '-ac', '2',
 ]);
 
 // 出力ファイル
@@ -84,6 +90,9 @@ Array.prototype.push.apply(args, [output]);
 (async () => {
     // 進捗計算のために動画の長さを取得
     const duration = await getDuration(input);
+
+    //ログ
+    logStream.write(`\n[FFmpeg Command]\n${ffmpeg} ${args.join(' ')}\n\n`);
 
     const child = spawn(ffmpeg, args);
 
@@ -100,8 +109,8 @@ Array.prototype.push.apply(args, [output]);
                 // 想定log
                 // frame= 5159 fps= 11 q=29.0 size=  122624kB time=00:02:51.84 bitrate=5845.8kbits/s dup=19 drop=0 speed=0.372x
                 const progress = {};
-                const ffmpeg_reg = /frame=\s*(?<frame>\d+)\sfps=\s*(?<fps>\d+(?:\.\d+)?)\sq=\s*(?<q>[+-]?\d+(?:\.\d+)?)\sL?size=\s*(?<size>\d+(?:\.\d+)?)kB\stime=\s*(?<time>\d+[:\.\d+]*)\sbitrate=\s*(?<bitrate>\d+(?:\.\d+)?)kbits\/s(?:\sdup=\s*(?<dup>\d+))?(?:\sdrop=\s*(?<drop>\d+))?\sspeed=\s*(?<speed>\d+(?:\.\d+)?)x/;
-                let ffmatch =str.match(ffmpeg_reg);
+                const ffmpeg_reg = /frame=\s*(?<frame>\d+)\sfps=\s*(?<fps>\d+(?:\.\d+)?)\sq=\s*(?<q>[+-]?\d+(?:\.\d+)?)\sL?size=\s*(?<size>\d+(?:\.\d+)?)(kB|KiB)\stime=\s*(?<time>\d+[:\.\d+]*)\sbitrate=\s*(?<bitrate>\d+(?:\.\d+)?)kbits\/s(?:\sdup=\s*(?<dup>\d+))?(?:\sdrop=\s*(?<drop>\d+))?\sspeed=\s*(?<speed>\d+(?:\.\d+)?)x/;
+                let ffmatch = str.match(ffmpeg_reg);
                 /**
                  * match結果
                  * [
