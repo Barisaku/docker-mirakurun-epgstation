@@ -92,9 +92,6 @@ Array.prototype.push.apply(args, [output]);
     // 進捗計算のために動画の長さを取得
     const duration = await getDuration(input);
 
-    //ログ
-    logStream.write(`\n[FFmpeg Command]\n${ffmpeg} ${args.join(' ')}\n\n`);
-
     const child = spawn(ffmpeg, args);
 
     /**
