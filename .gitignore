@@ -17,6 +17,7 @@
 !/epgstation/config/operatorLogConfig.sample.yml
 !/epgstation/config/epgUpdaterLogConfig.sample.yml
 !/epgstation/config/serviceLogConfig.sample.yml
+!/epgstation/config/notify_discord.sh.template
 /epgstation/data/*.json
 /docker-compose.yml
 !.gitkeep

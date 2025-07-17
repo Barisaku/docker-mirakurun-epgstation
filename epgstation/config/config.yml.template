@@ -33,6 +33,16 @@ thumbnailPosition: 5
 ffmpeg: /usr/local/bin/ffmpeg
 ffprobe: /usr/local/bin/ffprobe
 
+reserveNewAddtionCommand: "/app/config/notify_discord.sh reserve_new"
+reserveUpdateCommand: "/app/config/notify_discord.sh reserve_update"
+reservedeletedCommand: "/app/config/notify_discord.sh reserve_deleted"
+recordingPreStartCommand: "/app/config/notify_discord.sh recording_prestart"
+recordingPrepRecFailedCommand: "/app/config/notify_discord.sh prep_failed"
+recordingStartCommand: "/app/config/notify_discord.sh recording_start"
+recordingFinishCommand: "/app/config/notify_discord.sh recording_finish"
+recordingFailedCommand: "/app/config/notify_discord.sh recording_failed"
+encodingFinishCommand: "/app/config/notify_discord.sh encoding_finish"
+
 encodeProcessNum: 4
 concurrentEncodeNum: 1
 encode:

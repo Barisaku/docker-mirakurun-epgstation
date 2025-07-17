@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# Discord Webhook URL
+WEBHOOK_URL="https://discord.com/api/webhooks/XXXXXXXX"
+
+TYPE="$1"
+TITLE=""
+MESSAGE=""
+COLOR=5814783  # デフォルト（青系）
+
+log() {
+  echo "[INFO] $1"
+}
+
+# UNIXミリ秒を秒に直して整形
+get_time() {
+  local ts=$(($1 / 1000))
+  date -d "@$ts" "+%Y-%m-%d %H:%M:%S"
+}
+
+case "$TYPE" in
+  reserve_new)
+    TITLE="🆕 録画予約追加"
+    COLOR=3447003  # 青
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+開始時刻: $(get_time $STARTAT)
+終了時刻: $(get_time $ENDAT)"
+    ;;
+  reserve_update)
+    TITLE="✏️ 録画予約更新"
+    COLOR=15844367  # 黄
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+開始時刻: $(get_time $STARTAT)
+終了時刻: $(get_time $ENDAT)"
+    ;;
+  reserve_deleted)
+    TITLE="🗑️ 録画予約削除"
+    COLOR=10038562  # オレンジ
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+開始時刻: $(get_time $STARTAT)
+終了時刻: $(get_time $ENDAT)"
+    ;;
+  recording_prestart)
+    TITLE="⏳ 録画準備開始"
+    COLOR=10197915  # 紫
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME"
+    ;;
+  prep_failed)
+    TITLE="❌ 録画準備失敗"
+    COLOR=15158332  # 赤
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME"
+    ;;
+  recording_start)
+    TITLE="🔴 録画開始"
+    COLOR=15105570  # 赤強め
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+開始時刻: $(get_time $STARTAT)"
+    ;;
+  recording_finish)
+    TITLE="✅ 録画完了"
+    COLOR=3066993  # 緑
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+終了時刻: $(get_time $ENDAT)
+出力: $RECPATH"
+    ;;
+  recording_failed)
+    TITLE="⚠️ 録画失敗"
+    COLOR=15158332  # 赤
+    MESSAGE="番組名: $NAME
+放送局: $CHANNELNAME
+エラー数: $ERROR_CNT
+ドロップ数: $DROP_CNT
+スクランブル数: $SCRAMBLING_CNT"
+    ;;
+  encoding_finish)
+    TITLE="🎞️ エンコード完了"
+    COLOR=3447003  # 青
+    MESSAGE="番組名: $NAME
+モード: $MODE
+出力: $OUTPUTPATH"
+    ;;
+  *)
+    TITLE="📢 不明な通知"
+    COLOR=0
+    MESSAGE="通知タイプ: $TYPE"
+    ;;
+esac
+
+# Discord通知送信
+curl -s -H "Content-Type: application/json" -X POST \
+  -d "$(jq -n \
+    --arg title "$TITLE" \
+    --arg desc "$MESSAGE" \
+    --argjson color "$COLOR" \
+    '{
+      username: "EPGStation",
+      embeds: [
+        {
+          title: $title,
+          description: $desc,
+          color: $color
+        }
+      ]
+    }')" "$WEBHOOK_URL"
