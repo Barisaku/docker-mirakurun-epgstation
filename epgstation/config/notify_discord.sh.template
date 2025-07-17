@@ -14,8 +14,7 @@ log() {
 
 # UNIXミリ秒を秒に直して整形
 get_time() {
-  local ts=$(($1 / 1000))
-  date -d "@$ts" "+%Y-%m-%d %H:%M:%S"
+  TZ=Asia/Tokyo date -d "@$(($1 / 1000))" "+%Y-%m-%d %H:%M:%S"
 }
 
 case "$TYPE" in
