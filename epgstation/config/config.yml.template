@@ -20,6 +20,9 @@ epgUpdateIntervalTime: 5
 conflictPriority: 1
 recPriority: 2
 
+apiServers:
+    - http://localhost:8888
+
 recordedFormat: '%TITLE%-%YEAR%年%MONTH%月%DAY%日%HOUR%時%MIN%分%SEC%秒-'
 recordedFileExtension: .ts
 recorded:
@@ -28,7 +31,7 @@ recorded:
 
 thumbnail: '%ROOT%/thumbnail'
 thumbnailSize: 480x270
-thumbnailPosition: 5
+thumbnailPosition: 30
 
 ffmpeg: /usr/local/bin/ffmpeg
 ffprobe: /usr/local/bin/ffprobe
