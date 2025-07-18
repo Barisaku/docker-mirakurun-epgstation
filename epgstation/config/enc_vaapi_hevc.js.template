@@ -12,7 +12,10 @@ const args = ['-y'];
 // settings
 const audioBitrate = '192k';
 const qp = 21;
-const videoFilter = 'format=p010,hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920'
+
+const videoFilter = 'format=vaapi,hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920:format=p010'
+// const videoFilter = 'format=nv12,hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920'
+// const videoFilter = 'yadif=0:-1:1,format=nv12,hwupload,scale_vaapi=h=1080:w=1920'
 
 /**
  * 動画長取得関数
@@ -39,9 +42,11 @@ const getDuration = filePath => {
 };
 
 Array.prototype.push.apply(args, [
+    '-analyzeduration', '10M', // 解析時間を増やす
+    '-probesize', '50M',      // プロブサイズを増やす
+    '-hwaccel', 'vaapi', // ハードウェアアクセラレーションを有効化
+    '-hwaccel_output_format', 'vaapi', // VAAPIデバイスへの出力フォーマット
     '-vaapi_device', '/dev/dri/renderD128',
-    // '-hwaccel', 'vaapi',
-    // '-hwaccel_output_format', 'vaapi'
 ]);
 
 // 字幕用
@@ -51,7 +56,16 @@ Array.prototype.push.apply(args, ['-i', input]);
 // ビデオストリーム設定
 Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'hevc_vaapi']);
 // インターレス解除
-Array.prototype.push.apply(args, ['-vf', videoFilter, '-pix_fmt', 'yuv420p10le', '-profile:v', '2', '-tag:v', 'hvc1', '-movflags', '+faststart']);
+Array.prototype.push.apply(args, [
+    '-vf', videoFilter,
+    // '-pix_fmt', 'yuv420p',
+    // '-profile:v', 'main',
+    // '-pix_fmt', 'yuv420p10le',
+    '-profile:v', '2',
+    '-tag:v', 'hvc1',
+    '-movflags', '+faststart',
+    // '-low_power', 'true'
+]);
 // オーディオストリーム設定
 if (isDualMono) {
     Array.prototype.push.apply(args, [
@@ -70,15 +84,20 @@ Array.prototype.push.apply(args, ['-c:a', 'libfdk_aac']);
 // 字幕ストリーム設定
 Array.prototype.push.apply(args, ['-map', '0:s?', '-c:s', 'mov_text']);
 
-// 品質設定
-//Array.prototype.push.apply(args, ['-preset', 'veryfast', '-crf', '26']);
-
-
 // Other options ...
 Array.prototype.push.apply(args, [
+    // '-rc_mode', '4', // ICQ (Intelligent Constant Quality) モード
+    // '-qp', qualityLevel, // ICQモードでの品質レベル
+    // '-rc', '1', // CRFモードを有効にする
+    // '-global_quality', crf, // CRF値を設定
     '-qp', qp,
-    '-g', '300',
-    '-bf', '8',
+    '-g', '60',
+    '-bf', '0',
+    // '-b:v', '3000k',          // 平均ビットレート（動画品質を安定）
+    // '-maxrate', '3500k',      // 最大ビットレート（iPhoneの互換性を保つ）
+    // '-bufsize', '6000k',      // ビットレートの変動バッファ
+    // '-g', '60',               // GOP（Iフレーム間隔）。約2秒に1回
+    // '-bf', '2',
     '-f', 'mp4',
     '-ar', '48000',
     '-ab', audioBitrate,

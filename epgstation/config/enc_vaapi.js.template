@@ -11,7 +11,7 @@ const args = ['-y'];
 // settings
 const audioBitrate = '192k';
 const qp = 21;
-const videoFilter = 'format=nv12,hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920'
+const videoFilter = 'hwupload,deinterlace_vaapi,scale_vaapi=h=1080:w=1920'
 
 /**
  * 動画長取得関数
@@ -38,9 +38,11 @@ const getDuration = filePath => {
 };
 
 Array.prototype.push.apply(args, [
+    '-analyzeduration', '10M', // 解析時間を増やす
+    '-probesize', '50M',      // プロブサイズを増やす
     '-vaapi_device', '/dev/dri/renderD128',
-    // '-hwaccel', 'vaapi',
-    // '-hwaccel_output_format', 'vaapi'
+    '-hwaccel', 'vaapi',
+    '-hwaccel_output_format', 'vaapi'
 ]);
 
 // 字幕用
@@ -69,15 +71,13 @@ Array.prototype.push.apply(args, ['-c:a', 'libfdk_aac']);
 // 字幕ストリーム設定
 Array.prototype.push.apply(args, ['-map', '0:s?', '-c:s', 'mov_text']);
 
-// 品質設定
-//Array.prototype.push.apply(args, ['-preset', 'veryfast', '-crf', '26']);
-
-
 // Other options ...
 Array.prototype.push.apply(args, [
+    '-movflags', '+faststart',
+    '-profile:v', 'high',
     '-qp', qp,
-    '-g', '300',
-    '-bf', '8',
+    '-g', '60',
+    '-bf', '2',
     '-f', 'mp4',
     '-ar', '48000',
     '-ab', audioBitrate,

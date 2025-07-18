@@ -38,12 +38,17 @@ const getDuration = filePath => {
     });
 };
 
+Array.prototype.push.apply(args, [
+    '-analyzeduration', '10M', // 解析時間を増やす
+    '-probesize', '50M',      // プロブサイズを増やす
+]);
+
 // 字幕用
 Array.prototype.push.apply(args, ['-fix_sub_duration']);
 // input 設定
 Array.prototype.push.apply(args, ['-i', input]);
 // ビデオストリーム設定
-Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'libx265', '-pix_fmt', 'yuv420p10le', '-profile:v', 'main10', '-tag:v', 'hvc1']);
+Array.prototype.push.apply(args, ['-map', '0:v', '-c:v', 'libx265', '-pix_fmt', 'yuv420p10le', '-profile:v', 'main10', '-tag:v', 'hvc1', '-level:v', '5.0']);
 // インターレス解除
 Array.prototype.push.apply(args, ['-vf', videoFilter]);
 // オーディオストリーム設定
@@ -66,8 +71,8 @@ Array.prototype.push.apply(args, ['-map', '0:s?', '-c:s', 'mov_text']);
 // 品質設定
 Array.prototype.push.apply(args, ['-preset', preset, '-crf', crf]);
 // Other options ...
-Array.prototype.push.apply(args, ['-maxrate:v', '2.5M']);
 Array.prototype.push.apply(args, [
+    '-movflags', '+faststart',
     '-aspect', '16:9',
     '-f', 'mp4',
     '-ar', '48000',
