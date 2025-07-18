@@ -44,6 +44,7 @@ const getDuration = filePath => {
 Array.prototype.push.apply(args, [
     '-analyzeduration', '10M', // 解析時間を増やす
     '-probesize', '50M',      // プロブサイズを増やす
+    '-ignore_unknown',
     '-hwaccel', 'vaapi', // ハードウェアアクセラレーションを有効化
     '-hwaccel_output_format', 'vaapi', // VAAPIデバイスへの出力フォーマット
     '-vaapi_device', '/dev/dri/renderD128',
@@ -60,7 +61,7 @@ Array.prototype.push.apply(args, [
     '-vf', videoFilter,
     // '-pix_fmt', 'yuv420p',
     // '-profile:v', 'main',
-    // '-pix_fmt', 'yuv420p10le',
+    '-pix_fmt', 'yuv420p10le',
     '-profile:v', '2',
     '-tag:v', 'hvc1',
     '-movflags', '+faststart',

@@ -41,6 +41,7 @@ const getDuration = filePath => {
 Array.prototype.push.apply(args, [
     '-analyzeduration', '10M', // 解析時間を増やす
     '-probesize', '50M',      // プロブサイズを増やす
+    '-ignore_unknown'
 ]);
 
 // 字幕用

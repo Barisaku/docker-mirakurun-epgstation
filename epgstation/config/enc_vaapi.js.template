@@ -40,6 +40,7 @@ const getDuration = filePath => {
 Array.prototype.push.apply(args, [
     '-analyzeduration', '10M', // 解析時間を増やす
     '-probesize', '50M',      // プロブサイズを増やす
+    '-ignore_unknown',
     '-vaapi_device', '/dev/dri/renderD128',
     '-hwaccel', 'vaapi',
     '-hwaccel_output_format', 'vaapi'
